@@ -1,31 +1,72 @@
 package com.github.alxmag.doki
 
-import com.intellij.ide.highlighter.XmlFileType
-import com.intellij.psi.xml.XmlFile
+import com.intellij.openapi.actionSystem.IdeActions
+import com.intellij.openapi.ide.CopyPasteManager
 import com.intellij.testFramework.TestDataPath
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
-import com.intellij.util.PsiErrorElementUtil
+import org.intellij.lang.annotations.Language
+import org.jetbrains.yaml.YAMLFileType
+import java.awt.datatransfer.StringSelection
 
-@TestDataPath("\$CONTENT_ROOT/src/test/testData")
+@TestDataPath("\$CONTENT_ROOT/testData/pasteCommand")
 class MyPluginTest : BasePlatformTestCase() {
+    fun testEmpty() = doTestPaste(
+        "docker run -v foo:bar postgres",
 
-    fun testXMLFile() {
-        val psiFile = myFixture.configureByText(XmlFileType.INSTANCE, "<foo>bar</foo>")
-        val xmlFile = assertInstanceOf(psiFile, XmlFile::class.java)
+        """
+        version: "3.8"
+        <caret>
+        """.trimIndent(),
 
-        assertFalse(PsiErrorElementUtil.hasErrors(project, xmlFile.virtualFile))
+        """
+        version: "3.8"
+        services:
+          postgres:
+            image: postgres
+            volumes:
+              - foo:bar
+              
+        """.trimIndent()
+    )
 
-        assertNotNull(xmlFile.rootTag)
+    fun testDuplicated() = doTestPaste(
+        "docker run -v bar:baz postgres",
 
-        xmlFile.rootTag?.let {
-            assertEquals("foo", it.name)
-            assertEquals("bar", it.value.text)
-        }
+        """
+        version: "3.8"        
+        <caret>services:
+          postgres:
+            image: postgres
+            volumes:
+              - foo:bar
+              
+        """.trimIndent(),
+
+        """
+        version: "3.8"
+        services:
+          postgres:
+            image: postgres
+            volumes:
+              - foo:bar
+          
+          postgres1:
+            image: postgres
+            volumes:
+              - bar:baz
+        """.trimIndent()
+    )
+
+    private fun doTestPaste(
+        command: String,
+        @Language("yaml") before: String,
+        @Language("yaml") after: String
+    ) {
+        myFixture.configureByText(YAMLFileType.YML, before)
+        CopyPasteManager.getInstance().setContents(StringSelection(command))
+        myFixture.performEditorAction(IdeActions.ACTION_EDITOR_PASTE)
+        myFixture.checkResult(after, true)
     }
 
-    fun testRename() {
-        myFixture.testRename("foo.xml", "foo_after.xml", "a2")
-    }
-
-    override fun getTestDataPath() = "src/test/testData/rename"
+    override fun getTestDataPath() = "src/test/testData/pasteCommand"
 }
