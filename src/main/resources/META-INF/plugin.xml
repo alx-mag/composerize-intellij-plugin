@@ -1,18 +1,15 @@
 <!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
 <idea-plugin>
-    <id>com.github.alxmag.composerizeintellijplugin</id>
-    <name>composerize-intellij-plugin Template</name>
+    <id>com.github.alxmag.doki</id>
+    <name>Doki</name>
     <vendor>alx-mag</vendor>
 
     <depends>com.intellij.modules.platform</depends>
+    <depends>org.jetbrains.plugins.yaml</depends>
 
     <resource-bundle>messages.MyBundle</resource-bundle>
 
     <extensions defaultExtensionNs="com.intellij">
-        <toolWindow factoryClass="com.github.alxmag.composerizeintellijplugin.toolWindow.MyToolWindowFactory" id="MyToolWindow"/>
+        <copyPastePreProcessor implementation="com.github.alxmag.doki.DockerCopyPastPreProcessor"/>
     </extensions>
-
-    <applicationListeners>
-        <listener class="com.github.alxmag.composerizeintellijplugin.listeners.MyApplicationActivationListener" topic="com.intellij.openapi.application.ApplicationActivationListener"/>
-    </applicationListeners>
 </idea-plugin>

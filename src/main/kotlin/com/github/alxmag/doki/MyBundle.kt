@@ -1,4 +1,4 @@
-package com.github.alxmag.composerizeintellijplugin
+package com.github.alxmag.doki
 
 import com.intellij.DynamicBundle
 import org.jetbrains.annotations.NonNls
