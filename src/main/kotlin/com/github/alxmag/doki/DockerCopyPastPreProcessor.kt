@@ -6,14 +6,10 @@ import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.RawText
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiFile
-import com.intellij.psi.util.PsiUtilCore
-import com.intellij.psi.util.childrenOfType
-import com.intellij.psi.util.parentOfType
 import com.intellij.util.asSafely
 import org.jetbrains.yaml.YAMLElementGenerator
 import org.jetbrains.yaml.psi.YAMLDocument
 import org.jetbrains.yaml.psi.YAMLFile
-import org.jetbrains.yaml.psi.YAMLKeyValue
 import org.jetbrains.yaml.psi.YAMLMapping
 
 class DockerCopyPastPreProcessor : CopyPastePreProcessor {
@@ -90,53 +86,8 @@ class DockerCopyPastPreProcessor : CopyPastePreProcessor {
             return
         }
 
-        for (otherService in otherServicesMapping.keyValues) {
-            servicesMapping.putKeyValueResolvingDuplicatedKeys(otherService)
-        }
-        return
+        otherServicesMapping.keyValues.asSequence()
+            .map { serviceKeyValue -> serviceKeyValue.withUniqueKeyForMapping(servicesMapping) }
+            .forEach(servicesMapping::putKeyValue)
     }
-}
-
-val YAMLFile.firstDocument: YAMLDocument
-    get() = this.documents[0]
-
-val YAMLDocument.rootMapping
-    get() = this.childrenOfType<YAMLMapping>()
-        .firstOrNull()
-
-fun YAMLFile.getDocumentAtOffset(offset: Int): YAMLDocument {
-    return PsiUtilCore.getElementAtOffset(this, offset)
-        .parentOfType<YAMLDocument>()
-        ?: this.documents.first()
-}
-
-val YAMLMapping.usedKeys
-    get() = keyValues.map { it.keyText }.toSet()
-
-fun YAMLMapping.putKeyValueResolvingDuplicatedKeys(yamlKeyValue: YAMLKeyValue) {
-    val originKey = yamlKeyValue.keyText
-    var index = 1
-    var fixedKey = originKey
-
-    val usedKeys = this.usedKeys
-    while (fixedKey in usedKeys) {
-        fixedKey = originKey + index++
-    }
-
-    var fixedKeyValue = yamlKeyValue
-    if (originKey != fixedKey) {
-        fixedKeyValue = yamlKeyValue.withKeyText(fixedKey)
-    }
-
-    this.putKeyValue(fixedKeyValue)
-}
-
-fun YAMLKeyValue.withKeyText(keyText: String): YAMLKeyValue {
-    val newKeyPsiElement = YAMLElementGenerator.getInstance(project)
-        .createYamlKeyValue(keyText, "Dummy")
-        .key!!
-
-    val copy = this.copy() as YAMLKeyValue
-    copy.key!!.replace(newKeyPsiElement)
-    return copy
 }

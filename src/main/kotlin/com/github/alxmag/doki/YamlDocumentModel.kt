@@ -1,5 +1,8 @@
 package com.github.alxmag.doki
 
+import com.charleskorn.kaml.SingleLineStringStyle
+import com.charleskorn.kaml.Yaml
+import com.charleskorn.kaml.YamlConfiguration
 import com.github.alxmag.doki.Kaml.DefaultKaml
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
@@ -42,22 +45,27 @@ fun DockerRunCommand.toDocumentModel(namer: ServiceNamer = ServiceNamer.DEFAULT)
     return YamlDocumentModel(services)
 }
 
-fun YamlDocumentModel.encodeToString() = DefaultKaml.encodeToString(this)
-
 fun interface ServiceNamer {
     fun name(service: Service): String
 
     companion object {
         val DEFAULT: ServiceNamer = ServiceNamer { service ->
-            service.image
-                .takeIf { it.isNotBlank() }
-                ?: "service"
+            sequence {
+                yield(service.container_name)
+                yield(service.image)
+                yield("service")
+            }
+                .filterNotNull()
+                .filter { it.isNotBlank() }
+                .first()
         }
     }
 }
 
 @Serializable
-data class YamlDocumentModel(val services: Map<String, Service>)
+data class YamlDocumentModel(val services: Map<String, Service>) {
+    fun encodeToString() = DefaultKaml.encodeToString(this)
+}
 
 @Suppress("PropertyName", "SpellCheckingInspection")
 @Serializable
@@ -98,3 +106,11 @@ data class Service(
     )
 }
 
+object Kaml {
+    private val defaultConfiguration = YamlConfiguration(
+        encodeDefaults = false,
+        singleLineStringStyle = SingleLineStringStyle.PlainExceptAmbiguous
+    )
+
+    val DefaultKaml = Yaml(configuration = defaultConfiguration)
+}
