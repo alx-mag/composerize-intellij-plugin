@@ -52,8 +52,7 @@ class DockerCopyPastPreProcessor : CopyPastePreProcessor {
     }
 
     private fun buildDocument(project: Project, command: DockerRunCommand): YAMLDocument {
-        val yamlText = command.toDocumentModel()
-            .encodeToString()
+        val yamlText = command.toDockerComposeDocumentModel().asString()
         return YAMLElementGenerator.getInstance(project)
             .createDummyYamlWithText(yamlText)
             .firstDocument

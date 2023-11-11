@@ -100,6 +100,20 @@ class PasteDockerCommandTest : BasePlatformTestCase() {
         """.trimIndent()
     )
 
+    fun testWithCommand() = doTestPaste(
+        "docker run --name some-postgres -e POSTGRES_PASSWORD_FILE=/run/secrets/postgres-passwd -d postgres foo --bar baz",
+        """""",
+        """
+        services:
+          some-postgres:
+            image: postgres
+            environment:
+              - POSTGRES_PASSWORD_FILE=/run/secrets/postgres-passwd
+            container_name: some-postgres
+            command: foo --bar baz
+        """.trimIndent()
+    )
+
     private fun doTestPaste(
         command: String,
         @Language("yaml") before: String,
