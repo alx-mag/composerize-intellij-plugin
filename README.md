@@ -4,33 +4,26 @@ A plugin for Intellij IDEs.
 <!-- Plugin description -->
 Converts `docker run` commands into yaml format when pasted into `docker-compose.yml` file. 
 
-Works like [composerize.com](https://www.composerize.com/).
+Works like [composerize.com](https://www.composerize.com/) web converter.
 
-### Example
+### How to use
 
-Copy the `docker run` text:
-```
-docker run --name some-postgres -e POSTGRES_PASSWORD_FILE=/run/secrets/postgres-passwd -d postgres
-```
+1. Copy your `docker run` command text, for example:
+   ```
+   docker run --name some-postgres -e POSTGRES_PASSWORD_FILE=/run/secrets/postgres-passwd -d postgres
+   ```
 
-Paste it into the file:
-```yaml
-# docker-compose.yml (before)
-version: "3"
-```
+2. Paste it into your `docker-compose.yml` file. You will get something like this:
 
-The text will be pasted like this:
-
-```yaml
-# docker-compose.yml (after)
-version: "3"
-services:
-  some-postgres:
-    image: postgres
-    environment:
-      - POSTGRES_PASSWORD_FILE=/run/secrets/postgres-passwd
-    container_name: some-postgres
-```
+   ```yaml
+   version: 3
+   services:
+     some-postgres:
+       image: postgres
+       environment:
+         - POSTGRES_PASSWORD_FILE=/run/secrets/postgres-passwd
+       container_name: some-postgres
+   ```
 
 <!-- Plugin description end -->
 
