@@ -24,7 +24,9 @@ repositories {
 
 // Dependencies are managed with Gradle version catalog - read more: https://docs.gradle.org/current/userguide/platforms.html#sub:version-catalog
 dependencies {
-    implementation("com.github.ajalt.clikt:clikt:4.2.1")
+    implementation("com.github.ajalt.clikt:clikt:4.2.1") {
+        exclude("org.jetbrains", "markdown")
+    }
     implementation("com.charleskorn.kaml:kaml:0.55.0")
 }
 
