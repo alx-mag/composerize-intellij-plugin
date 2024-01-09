@@ -1,6 +1,10 @@
 <!-- Keep a Changelog guide -> https://keepachangelog.com -->
 
-# composerize-intellij-plugin Changelog
+# Changelog
+
+## [1.0.1]
+### Added
+- New plugin icon
 
 ## [1.0.0]
 ### Added
